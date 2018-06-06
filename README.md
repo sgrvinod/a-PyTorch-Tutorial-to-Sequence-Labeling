@@ -508,7 +508,9 @@ See `train.py`.
 
 # FAQs
 
-__How do we decide if we need <start> and <end> tokens for any model that uses sequences as inputs or targets?__
+---
+
+__How do we decide if we need `<start>` and `<end>` tokens for any model that uses sequences as inputs or targets?__
 
 If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you have in mind. In this model, because of how the CRF scores are structured we would need the `<end>` token (or the `<start>` token; see next question).
 
@@ -516,11 +518,15 @@ In my other tutorial on image captioning, we use _both_ `<start>` and `<end>` to
 
 If you're performing text classification, you would need neither.
 
+---
+
 __Can we have the CRF output `current_word -> next_word` scores instead of `previous_word -> current_word` scores?__
 
 Yes. In this case you would broadcast the emission scores like `L, m, _`, and you would have a `<start>` token in every sentence instead of an `<end>` token. The correct tag of the `<start>` token would always be the `<start>` tag. The "next tag" of the last word would always be the `<end>` tag.
 
 I think the `previous word -> next word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learning to recognize the completeness of sentences.
+
+---
 
 __Why are we using different vocabularies for the the inputs to the sequence tagger and language models' outputs?__
 
@@ -528,11 +534,15 @@ The language models will learn to predict only those words it has seen during tr
 
 But we _can_ add these words to the input layer, even if the model never sees them during training. Since we're using pre-trained embeddings at the input, it doesn't _need_ to see them because the meanings of words are encoded in these vectors. If it's encountered a `chimpanzee` before, it likely knows what to do with an `orangutan`!
 
+---
+
 __Is it a good idea to fine-tune the pre-trained word embeddings we use in this model?__
 
 I refrain from fine-tuning because most of the input vocabulary is not in-corpus. Most embeddings will remain the same while a few are fine-tuned. If the fine-tuning changes the embeddings sufficiently, the model may not work well on words that weren't fine-tuned. In the real world, we're bound to encounter many words that weren't present in a newspaper corpus from 2003.
 
 I'll try to verify if this is true when I get the time.
+
+---
 
 __How do we use dynamic graphs in PyTorch to compute over only the true lengths of sequences?__
 
@@ -543,6 +553,8 @@ If you want to execute an operation (like a linear layer transformation) only on
 Similarly, if you want to perform an aggregation operation, like computing the loss, use `pack_padded_sequences()` to eliminate the pads.
 
 If you want to perform timestep-wise operations, you can take a leaf out of how `pack_padded_sequences()` works, and compute only on the effective batch size at each timestep with a `for` loop to iterate over the timesteps. We did this in the `ViterbiLoss` and `ViterbiDecoder`. I also used an `LSTMCell()` in this fashion in my image captioning tutorial.
+
+---
 
 __*Dunston Checks In*? Really?__
 
