@@ -1,4 +1,4 @@
-This is a **[PyTorch](https://pytorch.org) Tutorial to Sequence Tagging**.
+This is a **[PyTorch](https://pytorch.org) Tutorial to Sequence Labeling**.
 
 This is the second in a series of tutorials I plan to write about _implementing_ cool models on your own with the amazing PyTorch library.
 
@@ -12,15 +12,15 @@ I'm using `PyTorch 0.4` in `Python 3.6`.
 
 # Contents
 
-[***Objective***](https://github.com/sgrvinod/caption#objective)
+[***Objective***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#objective)
 
-[***Concepts***](https://github.com/sgrvinod/caption#concepts)
+[***Concepts***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#concepts)
 
-[***Overview***](https://github.com/sgrvinod/caption#overview)
+[***Overview***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#overview)
 
-[***Implementation***](https://github.com/sgrvinod/caption#implementation)
+[***Implementation***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#implementation)
 
-[***Frequently Asked Questions***](https://github.com/sgrvinod/caption#faqs)
+[***Frequently Asked Questions***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs)
 
 # Objective
 
@@ -48,7 +48,7 @@ This model is special because it augments the sequence labeling task by training
 
 # Overview
 
-In this section, I will present an overview of this model. If you're already familiar with it, you can skip straight to the **Implementation** section and the code.
+In this section, I will present an overview of this model. If you're already familiar with it, you can skip straight to the [Implementation](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#implementation) section and the code.
 
 ### LM-LSTM-CRF
 
@@ -314,7 +314,7 @@ For NER tagging, you can use the [Groningen Meaning Bank](http://gmb.let.rug.nl/
 
 For POS tagging, NLTK has a small dataset available you can access with `nltk.corpus.treebank.tagged_sents()`.
 
-You would either have to convert it to the CoNLL 2003 NER data format, or modify the code referenced in the [Data Pipeline]() section.
+You would either have to convert it to the CoNLL 2003 NER data format, or modify the code referenced in the [Data Pipeline](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#data-pipeline) section.
 
 ### Inputs to model
 
@@ -464,23 +464,23 @@ Therefore, **character lengths fed to the model must be an `Int` tensor of dimen
 
 ### Data pipeline
 
-See `read_words_tags()` in `utils.py`.
+See `read_words_tags()` in [`utils.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/utils.py).
 
 This reads the input files in the CoNLL 2003 format, and extracts the word and tag sequences.
 
-See `create_maps()` in `utils.py`.
+See `create_maps()` in [`utils.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/utils.py).
 
 Here, we create encoding maps for words, characters, and tags. We bin rare words and characters as `<unk>`s (unknowns).
 
-See `create_input_tensors()` in `utils.py`.
+See `create_input_tensors()` in [`utils.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/utils.py).
 
-We generate the eight inputs detailed in the [Inputs to Model]() section.
+We generate the eight inputs detailed in the [Inputs to Model](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#inputs-to-model) section.
 
-See `load_embeddings()` in `utils.py`.
+See `load_embeddings()` in [`utils.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/utils.py).
 
 We load pre-trained embeddings, with the option to expand the `word_map` to include out-of-corpus words present in the embedding vocabulary. Note that this may also include rare in-corpus words that were binned as `<unk>`s earlier.
 
-See `WCDataset` in `datasets.py`.
+See `WCDataset` in [`datasets.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/datasets.py).
 
 This is a subclass of PyTorch [`Dataset`](https://pytorch.org/docs/master/data.html#torch.utils.data.Dataset). It needs a `__len__` method defined, which returns the size of the dataset, and a `__getitem__` method which returns the `i`th set of the eight inputs to the model.
 
