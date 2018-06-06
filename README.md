@@ -26,7 +26,7 @@ I'm using `PyTorch 0.4` in `Python 3.6`.
 
 **To build a model that can tag each word in a sentence with entities, parts of speech, etc.**
 
-We will be implementing the [_Empower Sequence Labeling with Task-Aware Neural Language Model_](https://arxiv.org/abs/1709.04109) paper. This is more complex than most sequence tagging models, but you will learn many useful concepts - and it works extremely well.
+We will be implementing the [_Empower Sequence Labeling with Task-Aware Neural Language Model_](https://arxiv.org/abs/1709.04109) paper. This is more complex than most sequence tagging models, but you will learn many useful concepts - and it works extremely well. The authors' original implementation can be found [here](https://github.com/LiyuanLucasLiu/LM-LSTM-CRF).
 
 This model is special because it augments the sequence labeling task by training it _concurrently_ with language models.
 
@@ -512,21 +512,23 @@ See `train.py`.
 
 ---
 
-__How do we decide if we need `<start>` and `<end>` tokens for any model that uses sequences as inputs or targets?__
+__How do we decide if we need `<start>` and `<end>` tokens for a model that handles sequences?__
 
-If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you have in mind. In this model, because of how the CRF scores are structured we would need the `<end>` token (or the `<start>` token; see next question).
+If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you are planning to train.
 
-In my other tutorial on image captioning, we use _both_ `<start>` and `<end>` tokens. We need to start decoding _somewhere_, and we need to learn to recognize when to stop decoding during inference.
+For sequence labeling with a CRF, you need the `<end>` token (_or_ the `<start>` token; see next question) because of how the CRF scores are structured.
+
+In my other tutorial on image captioning, I used _both_ `<start>` and `<end>` tokens. The model needed to start decoding _somewhere_, and learn to recognize _when_ to stop decoding during inference.
 
 If you're performing text classification, you would need neither.
 
 ---
 
-__Can we have the CRF output `current_word -> next_word` scores instead of `previous_word -> current_word` scores?__
+__Can we have the CRF generate `current_word -> next_word` scores instead of `previous_word -> current_word` scores?__
 
 Yes. In this case you would broadcast the emission scores like `L, m, _`, and you would have a `<start>` token in every sentence instead of an `<end>` token. The correct tag of the `<start>` token would always be the `<start>` tag. The "next tag" of the last word would always be the `<end>` tag.
 
-I think the `previous word -> next word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learning to recognize the completeness of sentences.
+I think the `previous word -> next word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learn to recognize when a sentence is complete.
 
 ---
 
@@ -534,23 +536,21 @@ __Why are we using different vocabularies for the the inputs to the sequence tag
 
 The language models will learn to predict only those words it has seen during training. It's really unnecessary, and a huge waste of computation and memory, to use a linear-softmax layer with the extra ~400,000 out-of-corpus words from the embedding file it will never learn to predict.
 
-But we _can_ add these words to the input layer, even if the model never sees them during training. Since we're using pre-trained embeddings at the input, it doesn't _need_ to see them because the meanings of words are encoded in these vectors. If it's encountered a `chimpanzee` before, it likely knows what to do with an `orangutan`!
+But we _can_ add these words to the input layer even if the model never sees them during training. This is because we're using pre-trained embeddings at the input. It doesn't _need_ to see them because the meanings of words are encoded in these vectors. If it's encountered a `chimpanzee` before, it very likely knows what to do with an `orangutan`.
 
 ---
 
 __Is it a good idea to fine-tune the pre-trained word embeddings we use in this model?__
 
-I refrain from fine-tuning because most of the input vocabulary is not in-corpus. Most embeddings will remain the same while a few are fine-tuned. If the fine-tuning changes the embeddings sufficiently, the model may not work well on words that weren't fine-tuned. In the real world, we're bound to encounter many words that weren't present in a newspaper corpus from 2003.
-
-I'll try to verify if this is true when I get the time.
+I refrain from fine-tuning because most of the input vocabulary is not in-corpus. Most embeddings will remain the same while a few are fine-tuned. If fine-tuning changes these embeddings sufficiently, the model may not work well with the words that weren't fine-tuned. In the real world, we're bound to encounter many words that weren't present in a newspaper corpus from 2003.
 
 ---
 
-__How do we use dynamic graphs in PyTorch to compute over only the true lengths of sequences?__
+__What are some ways we can construct dynamic graphs in PyTorch to compute over only the true lengths of sequences?__
 
 If you're using an RNN, simply use [`pack_padded_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pack_padded_sequence). PyTorch will internally compute over only the true lengths. See `dynamic_rnn.py` for an example.
 
-If you want to execute an operation (like a linear layer transformation) only on the true timesteps, `pack_padded_sequences()` is still the way to go. This flattens the tensor by timestep while removing the pads. You can perform your operation, and then use [`pad_packed_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pad_packed_sequence) to unflatten it and re-pad it with `0`s.
+If you want to execute an operation (like a linear transformation) only on the true timesteps, `pack_padded_sequences()` is still the way to go. This flattens the tensor by timestep while removing the pads. You can perform your operation on this flattened tensor, and then use [`pad_packed_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pad_packed_sequence) to unflatten it and re-pad it with `0`s.
 
 Similarly, if you want to perform an aggregation operation, like computing the loss, use `pack_padded_sequences()` to eliminate the pads.
 
@@ -560,7 +560,7 @@ If you want to perform timestep-wise operations, you can take a leaf out of how 
 
 __*Dunston Checks In*? Really?__
 
-Man, I hadn't given a thought to the movie in twenty years. I was trying to think of a short sentence so it would be easier to visualize in the tutorial, and it just popped into my mind riding a wave of 90s nostalgia.
+I didn't have a single thought about this movie for twenty years. I was trying to think of a short sentence that would be easier to visualize in this tutorial and it just popped into my mind riding a wave of 90s nostalgia.
 
 <p align="center">
 <img src="./img/dci.jpg">
