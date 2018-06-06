@@ -69,13 +69,13 @@ Enriching existing features in this manner removes the need for using handcrafte
 The **total loss** during co-training is usually a linear combination of the losses on the individual tasks. The parameters of the combination can be fixed or learned as updateable weights.
 
 <p align="center">
-![](./img/loss.png)
+<img src="./img/loss.png">
 </p>
 
 Since we're aggregating individual losses, you can see how upstream layers shared by multiple tasks would receive updates from all of them during backpropagation.
 
 <p align="center">
-![](./img/update.png)
+<img src="./img/update.png">
 </p>
 
 The authors of the paper **simply add the losses** (`β=1`), and we will do the same.
@@ -142,8 +142,6 @@ To illustrate, if our example sentence `dunston checks in <end>` had the tags `t
 
 ![](./img/tagscores.jpg)
 
-Remember that **this is just convention.** You could just as well define the output of the CRF to be scores `current_tag -> next_tag` instead of `previous_tag -> current_tag`. In this case you would broadcast the emission scores like `L, m, _`, and you would have a `<start>` token in every sentence instead of an `<end>` token. The correct tag of the `<start>` token would always be the `<start>` tag. The "next tag" of the last word would always be the `<end>` tag.
-
 ### Highway Networks
 
 We generally use activated linear layers to transform and process outputs of an RNN/LSTM.
@@ -151,7 +149,7 @@ We generally use activated linear layers to transform and process outputs of an 
 If you're familiar with residual connections, we can add the input before the transformation to the transformed output, creating a path for data-flow around the transformation.
 
 <p align="center">
-![](./img/nothighway.png)
+<img src="./img/nothighway.png">
 </p>
 
 This path is a shortcut for the flow of gradients during backpropagation, and aids in the convergence of deep networks.
@@ -159,7 +157,7 @@ This path is a shortcut for the flow of gradients during backpropagation, and ai
 A **Highway Network** is similar to a residual network, but we use a **sigmoid-activated gate to determine the ratio in which the input and transformed output is combined**.
 
 <p align="center">
-![](./img/highway.png)
+<img src="./img/highway.png">
 </p>
 
 The authors of the paper make the case that using highway networks instead of regular linear networks improves performance.
@@ -211,7 +209,7 @@ Instead we will use the **Viterbi Loss** which, like Cross Entropy, is a "negati
 The score of a tag sequence `t` is defined as the sum of the scores of the individual tags.
 
 <p align="center">
-![](./img/vscore.png)
+<img src="./img/vscore.png">
 </p>
 
 (For example, consider the CRF scores we looked at earlier. The score of the tag sequence `tag_2, tag_3, tag_3, <end> tag` is the sum of the values in red, `4.85 + 6.79 + 3.85 + 3.52 = 19.01`.)
@@ -219,7 +217,7 @@ The score of a tag sequence `t` is defined as the sum of the scores of the indiv
 **The Viterbi Loss is then defined as**
 
 <p align="center">
-![](./img/vloss1.png)
+<img src="./img/vloss1.png">
 </p>
 
 where the gold tag sequence is `t_G` and the space of all possible tag sequences is `t`.
@@ -227,7 +225,7 @@ where the gold tag sequence is `t_G` and the space of all possible tag sequences
 This simplifies to
 
 <p align="center">
-![](./img/vloss3.png)
+<img src="./img/vloss3.png">
 </p>
 
 Therefore, the Viterbi Loss is the **difference between the log-sum-exp of the scores of all possible tag sequences and the score of the gold tag sequence**, i.e. `log-sum-exp(all scores) - gold score`.
@@ -512,10 +510,48 @@ See `train.py`.
 
 __How do we decide if we need <start> and <end> tokens for any model that uses sequences as inputs or targets?__
 
-__Can we have the CRF output `current_word -> next_word` scores instead of `previous_word -> current_word` scores?
+If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you have in mind. In this model, because of how the CRF scores are structured we would need the `<end>` token (or the `<start>` token; see next question).
+
+In my other tutorial on image captioning, we use _both_ `<start>` and `<end>` tokens. We need to start decoding _somewhere_, and we need to learn to recognize when to stop decoding during inference.
+
+If you're performing text classification, you would need neither.
+
+__Can we have the CRF output `current_word -> next_word` scores instead of `previous_word -> current_word` scores?__
+
+Yes. In this case you would broadcast the emission scores like `L, m, _`, and you would have a `<start>` token in every sentence instead of an `<end>` token. The correct tag of the `<start>` token would always be the `<start>` tag. The "next tag" of the last word would always be the `<end>` tag.
+
+I think the `previous word -> next word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learning to recognize the completeness of sentences.
 
 __Why are we using different vocabularies for the the inputs to the sequence tagger and language models' outputs?__
 
+The language models will learn to predict only those words it has seen during training. It's really unnecessary, and a huge waste of computation and memory, to use a linear-softmax layer with the extra ~400,000 out-of-corpus words from the embedding file it will never learn to predict.
+
+But we _can_ add these words to the input layer, even if the model never sees them during training. Since we're using pre-trained embeddings at the input, it doesn't _need_ to see them because the meanings of words are encoded in these vectors. If it's encountered a `chimpanzee` before, it likely knows what to do with an `orangutan`!
+
 __Is it a good idea to fine-tune the pre-trained word embeddings we use in this model?__
 
+I refrain from fine-tuning because most of the input vocabulary is not in-corpus. Most embeddings will remain the same while a few are fine-tuned. If the fine-tuning changes the embeddings sufficiently, the model may not work well on words that weren't fine-tuned. In the real world, we're bound to encounter many words that weren't present in a newspaper corpus from 2003.
+
+I'll try to verify if this is true when I get the time.
+
 __How do we use dynamic graphs in PyTorch to compute over only the true lengths of sequences?__
+
+If you're using an RNN, simply use [`pack_padded_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pack_padded_sequence). PyTorch will internally compute over only the true lengths. See `dynamic_rnn.py` for an example.
+
+If you want to execute an operation (like a linear layer transformation) only on the true timesteps, `pack_padded_sequences()` is still the way to go. This flattens the tensor by timestep while removing the pads. You can perform your operation, and then use [`pad_packed_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pad_packed_sequence) to unflatten it and re-pad it with `0`s.
+
+Similarly, if you want to perform an aggregation operation, like computing the loss, use `pack_padded_sequences()` to eliminate the pads.
+
+If you want to perform timestep-wise operations, you can take a leaf out of how `pack_padded_sequences()` works, and compute only on the effective batch size at each timestep with a `for` loop to iterate over the timesteps. We did this in the `ViterbiLoss` and `ViterbiDecoder`. I also used an `LSTMCell()` in this fashion in my image captioning tutorial.
+
+__*Dunston Checks In*? Really?__
+
+Man, I hadn't given a thought to the movie in twenty years. I was trying to think of a short sentence so it would be easier to visualize in the tutorial, and it just popped into my mind riding a wave of 90s nostalgia.
+
+<p align="center">
+<img src="./img/dci.jpg">
+</p>
+
+I wish I hadn't googled it though. Damn, the critics were harsh, weren't they? This gem was overwhelmingly and universally panned. I'm not sure I'd disagree if I watched it now, but that just goes to show the world is a lot more fun when you're a kid.
+
+Didn't have to worry about LM-LSTM-CRFs or nuthin...
