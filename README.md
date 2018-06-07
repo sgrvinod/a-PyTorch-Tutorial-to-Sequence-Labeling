@@ -605,8 +605,6 @@ We use `pack_padded_sequence()` to eliminate pads wherever necessary.
 
 # FAQs
 
----
-
 __How do we decide if we need `<start>` and `<end>` tokens for a model that uses sequences?__
 
 If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you are planning to train.
