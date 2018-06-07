@@ -20,11 +20,15 @@ I'm using `PyTorch 0.4` in `Python 3.6`.
 
 [***Implementation***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#implementation)
 
+[***Training***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#training)
+
 [***Frequently Asked Questions***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs)
 
 # Objective
 
 **To build a model that can tag each word in a sentence with entities, parts of speech, etc.**
+
+![](./img/ill.jpg)
 
 We will be implementing the [_Empower Sequence Labeling with Task-Aware Neural Language Model_](https://arxiv.org/abs/1709.04109) paper. This is more complex than most sequence tagging models, but you will learn many useful concepts – and it works extremely well. The authors' original implementation can be found [here](https://github.com/LiyuanLucasLiu/LM-LSTM-CRF).
 
