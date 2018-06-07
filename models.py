@@ -224,7 +224,6 @@ class LM_LSTM_CRF(nn.Module):
         cmarkers_f = cmarkers_f.unsqueeze(2).expand(self.batch_size, self.word_pad_len, self.char_rnn_dim)
         cmarkers_b = cmarkers_b.unsqueeze(2).expand(self.batch_size, self.word_pad_len, self.char_rnn_dim)
         cf_selected = torch.gather(cf, 1, cmarkers_f)  # (batch_size, word_pad_len, char_rnn_dim)
-
         cb_selected = torch.gather(cb, 1, cmarkers_b)
 
         # Only for co-training, not useful for tagging after model is trained

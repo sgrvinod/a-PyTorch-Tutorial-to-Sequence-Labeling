@@ -4,7 +4,7 @@ This is the second in a series of tutorials I plan to write about _implementing_
 
 Basic knowledge of PyTorch, recurrent neural networks is assumed.
 
-If you're new to PyTorch, first check out [Deep Learning with PyTorch: A 60 Minute Blitz](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) and [Learning PyTorch with Examples](https://pytorch.org/tutorials/beginner/pytorch_with_examples.html).
+If you're new to PyTorch, first read [Deep Learning with PyTorch: A 60 Minute Blitz](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) and [Learning PyTorch with Examples](https://pytorch.org/tutorials/beginner/pytorch_with_examples.html).
 
 Questions, suggestions, or corrections can be posted as issues.
 
@@ -26,7 +26,7 @@ I'm using `PyTorch 0.4` in `Python 3.6`.
 
 **To build a model that can tag each word in a sentence with entities, parts of speech, etc.**
 
-We will be implementing the [_Empower Sequence Labeling with Task-Aware Neural Language Model_](https://arxiv.org/abs/1709.04109) paper. This is more complex than most sequence tagging models, but you will learn many useful concepts - and it works extremely well. The authors' original implementation can be found [here](https://github.com/LiyuanLucasLiu/LM-LSTM-CRF).
+We will be implementing the [_Empower Sequence Labeling with Task-Aware Neural Language Model_](https://arxiv.org/abs/1709.04109) paper. This is more complex than most sequence tagging models, but you will learn many useful concepts – and it works extremely well. The authors' original implementation can be found [here](https://github.com/LiyuanLucasLiu/LM-LSTM-CRF).
 
 This model is special because it augments the sequence labeling task by training it _concurrently_ with language models.
 
@@ -48,7 +48,7 @@ This model is special because it augments the sequence labeling task by training
 
 # Overview
 
-In this section, I will present an overview of this model. If you're already familiar with it, you can skip straight to the [Implementation](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#implementation) section and the code.
+In this section, I will present an overview of this model. If you're already familiar with it, you can skip straight to the [Implementation](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#implementation) section or the commented code.
 
 ### LM-LSTM-CRF
 
@@ -62,7 +62,7 @@ This image from the paper thoroughly represents the entire model, but don't worr
 
 **Co-training is when you simultaneously train a model on two or more tasks.**
 
-Usually we're only interested in _one_ of these tasks - in this case, the sequence labeling.
+Usually we're only interested in _one_ of these tasks – in this case, the sequence labeling.
 
 But when layers in a neural network contribute towards performing multiple functions, they learn more than they would have if they had trained only on the primary task. This is because the information extracted at each layer is expanded to accomodate all tasks. When there is more information to work with, **performance on the primary task is enhanced**.
 
@@ -98,7 +98,7 @@ We _also_ use the outputs of these two **character-RNNs** as inputs to our **wor
 
 We're using sub-word information in our tagging task because it can be a powerful indicator of the tags, whether they're parts of speech or entities. For example, it may learn that adjectives commonly end with "-y" or "-ul", or that places  often end with "-land" or "-burg".
 
-But our sub-word features, viz. the outputs of the Character RNNs, are also enriched with _additional_ information - the knowledge it needs to predict the next word in both forward and backward directions, because of models 1 and 2.
+But our sub-word features, viz. the outputs of the Character RNNs, are also enriched with _additional_ information – the knowledge it needs to predict the next word in both forward and backward directions, because of models 1 and 2.
 
 Therefore, our sequence tagging model uses both
 - **word-level information** in the form of word embeddings.
@@ -122,7 +122,7 @@ The transition scores are an `m, m` tensor. Since the transition scores are glob
 
 We can now **add them to get the total scores which are an `L, m, m` tensor**. A value at position `k, i, j` is the _aggregate_ of the emission score of the `j`th tag at the `k`th word and the transition score of the `j`th tag at the `k`th word considering the previous word was the `i`th tag.
 
-For our example sentence `dunston checks in <end>`, if we assume there are 5 tags in total, the total scores would look like this -
+For our example sentence `dunston checks in <end>`, if we assume there are 5 tags in total, the total scores would look like this –
 
 ![](./img/tagscores0.jpg)
 
@@ -164,7 +164,7 @@ A **Highway Network** is similar to a residual network, but we use a **sigmoid-a
 
 The authors of the paper make the case that using highway networks instead of regular linear networks improves performance.
 
-We will use Highway Networks at **three locations** in our combined model -
+We will use Highway Networks at **three locations** in our combined model –
 
 - to transform the output of the forward character-RNN to predict the next word.
 - to transform the output of the backward character-RNN to predict the next word (in the backward direction).
@@ -214,7 +214,11 @@ The score of a tag sequence `t` is defined as the sum of the scores of the indiv
 <img src="./img/vscore.png">
 </p>
 
-(For example, consider the CRF scores we looked at earlier. The score of the tag sequence `tag_2, tag_3, tag_3, <end> tag` is the sum of the values in red, `4.85 + 6.79 + 3.85 + 3.52 = 19.01`.)
+For example, consider the CRF scores we looked at earlier –
+
+![](./img/tagscores.jpg)
+
+The score of the tag sequence `tag_2, tag_3, tag_3, <end> tag` is the sum of the values in red, `4.85 + 6.79 + 3.85 + 3.52 = 19.01`.
 
 **The Viterbi Loss is then defined as**
 
@@ -222,9 +226,9 @@ The score of a tag sequence `t` is defined as the sum of the scores of the indiv
 <img src="./img/vloss1.png">
 </p>
 
-where the gold tag sequence is `t_G` and the space of all possible tag sequences is `t`.
+where `t_G` is the gold tag sequence and `T` represents the space of all possible tag sequences.
 
-This simplifies to
+This simplifies to –
 
 <p align="center">
 <img src="./img/vloss3.png">
@@ -238,7 +242,7 @@ Therefore, the Viterbi Loss is the **difference between the log-sum-exp of the s
 
 Once you generate CRF scores in a `L, m, m` matrix for a sequence of length `L`, we start decoding.
 
-Viterbi Decoding is best understood with an example. Consider again -
+Viterbi Decoding is best understood with an example. Consider again –
 
 ![](./img/tagscores0.jpg)
 
@@ -290,7 +294,7 @@ They are meant to provide some context, but **details are best understood direct
 
 I use the CoNLL 2003 NER dataset to compare my results with the paper.
 
-Here's a snippet -
+Here's a snippet –
 
 ```
 -DOCSTART- -X- O O
@@ -308,7 +312,7 @@ lamb NN I-NP O
 
 This dataset is not meant to be publicly distributed, although you may find it somewhere online.
 
-You will find several public datasets online that you can use to train the model. These may not all be 100% human annotated, but they are sufficient.
+There are several public datasets online that you can use to train the model. These may not all be 100% human annotated, but they are sufficient.
 
 For NER tagging, you can use the [Groningen Meaning Bank](http://gmb.let.rug.nl/data.php).
 
@@ -372,13 +376,13 @@ Therefore, **backward character sequences fed to the model must be an `Int` tens
 
 #### Character Markers (Forward)
 
-These markers are **positions in the character sequences** where we extract features to
+These markers are **positions in the character sequences** where we extract features to –
 - generate the next word in the language models, and
 - use as character-level features in the word-level RNN in the sequence labeler
 
 We will extract features at the end of every space `' '` in the character sequence, and at the `<end>` token.
 
-For the forward character sequence, we extract at -
+For the forward character sequence, we extract at –
 
 `7, 14, 17, 18`
 
@@ -410,13 +414,13 @@ Therefore, **backward character markers fed to the model must be an `Int` tensor
 
 #### Tags
 
-Let's assume the correct tags for `dunston, checks, in, <end>` are
+Let's assume the correct tags for `dunston, checks, in, <end>` are –
 
 `tag_2, tag_3, tag_3, <end>`
 
 We have a `tag_map` (containing the tags `<start>`, `tag_1`, `tag_2`, `tag_3`,  `<end>`).
 
-Normally, we would just encode them directly (before padding) -
+Normally, we would just encode them directly (before padding) –
 
 `2, 3, 3, 5`
 
@@ -486,33 +490,124 @@ This is a subclass of PyTorch [`Dataset`](https://pytorch.org/docs/master/data.h
 
 The `Dataset` will be used by a PyTorch [`DataLoader`](https://pytorch.org/docs/master/data.html#torch.utils.data.DataLoader) in `train.py` to create and feed batches of data to the model for training or validation.
 
+### Highway Networks
+
+See `Highway` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/models.py).
+
+A **transform** is a ReLU-activated linear transformation of the input. A **gate** is a sigmoid-activated linear transformation of the input. Note that **both transformations must be the same size as the input**, to allow for adding the input in a residual connection.
+
+The `num_layers` attribute specifices how many transform-gate-residual-connection operations we perform in series. Usually just one is sufficient.
+
+We store the requisite number of transform and gate layers in separate `ModuleList()`s, and use a `for` loop to perform successive operations.  
+
 ### Language Models
 
-### Highway Networks
+See `LM_LSTM_CRF` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/models.py).
+
+At the very outset, we **sort the forward and backward character sequences by decreasing lengths**. This is required to use [`pack_padded_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pack_padded_sequence) in order for the LSTM to compute over only the valid timesteps, i.e. the true length of the sequences.
+
+Remember to also sort all other tensors in the same order.
+
+See [`dynamic_rnn.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/ddynamic_rnn.py) for an illustration of how `pack_padded_sequence()` can be used to take advantage of PyTorch's dynamic graphing and batching capabilities so that we don't process the pads. It flattens the sorted sequences by timestep while ignoring the pads, and the **LSTM computes over only the effective batch size `N_t` at each timestep**.
+
+![](./img/sorted.jpg)
+
+The **sorting allows the top `N_t` at any timestep to align with the outputs from the previous step**. At the third timestep, for example, we process only the top 5 images, using the top 5 outputs from the previous step. Except for the sorting, all of this is handled internally by PyTorch, but it's still very useful to understand what `pack_padded_sequence()` does so we can use it in other scenarios to achieve similar ends. (See the related question about handling variable length sequences in the [FAQs](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs) section.)
+
+Upon sorting, we **apply the forward and backward LSTMs on the forward and backward `packed_sequences`** respectively. We use [`pad_packed_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pad_packed_sequence) to unflatten and re-pad the outputs.
+
+We **extract only the outputs at the forward and backward character markers** with [`gather`](https://pytorch.org/docs/master/torch.html#torch.gather). This function is very useful for extracting only certain indices from a tensor that are specified in a separate tensor.
+
+These **extracted outputs are processed by the forward and backward Highway layers** before applying a **linear layer to compute scores over the vocabulary** for predicting the next word at each marker. We do this only during training, since it makes no sense to perform language modeling for co-training during validation or inference. The `training` attribute of any model is set with `model.train()` or `model.eval()` in `train.py`. (Note that this is primarily used to enable or disable dropout and batch-norm layers in a PyTorch model during training and inference respectively.)
 
 ### Sequence Labeling Model
 
+See `LM_LSTM_CRF` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/models.py) (continued).
+
+We also **sort the word sequences by decreasing lengths**, because there may not always be a correlation between the lengths of the word sequences and the character sequences.
+
+Remember to also sort all other tensors in the same order.
+
+We **concatenate the foward and backward character LSTM outputs at the markers, and run it through the third Highway layer**. This will extract the sub-word information at each word which we will use for sequence labeling.
+
+We **concatenate this result with the word embeddings, and compute BLSTM outputs** over the `packed_sequence`.
+
+Upon re-padding with `pad_packed_sequence()`, we have the features we need to feed to the CRF layer.
+
 ### Conditional Random Field (CRF)
+
+See `CRF` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/models.py).
+
+You may find this layer is surprisingly straightforward considering the value it adds to our model.
+
+A linear layer is used to transform the outputs from the BLSTM to scores for each tag, which are the **emission scores**.
+
+A single tensor is used to hold the **transition scores**. This tensor is a [`Parameter`](https://pytorch.org/docs/master/nn.html#torch.nn.Parameter) of the model, which means it is updateable during backpropagation, just like the weights of the other layers.
+
+To find the CRF scores, **compute the emission scores at each word and add it to the transition scores**, after broadcasting both as described in the [CRF Overview](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#conditional-random-field-crf).
+
+### Viterbi Loss
+
+See `ViterbiLoss` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/models.py).
+
+We established in the [Viterbi Loss Overview](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#viterbi-loss) that we want to minimize the **difference between the log-sum-exp of the scores of all possible valid tag sequences and the score of the gold tag sequence**, i.e. `log-sum-exp(all scores) - gold score`.
+
+We sum the CRF scores of each true tag as described earlier to calculate the **gold score**.
+
+Remember how we encoded tag sequences with their positions in the unrolled CRF scores? We extract the scores at these positions with `gather()` and eliminate the pads with `pack_padded_sequences()` before summing.
+
+Finding the **log-sum-exp of the scores of all possible sequences** is slightly trickier. We use a `for` loop to iterate over the timesteps. At each timestep, we **accumulate scores for each `current_tag`** by –
+
+- **adding the CRF scores at this timestep to the accumulated scores from the previous timestep** to find the accumulated score for each `current_tag` for each `previous_tag`. We do this at only the effective batch size, i.e. for sequences that haven't completed yet. (Our sequences are still sorted by decreasing word lengths, from the `LM-LSTM-CRF` model.)
+- **for each `current_tag`, compute the log-sum-exp over the `previous_tag`s** to find the new accumulated scores at each `current_tag`.
+
+After computing over the variable lengths of all sequences, we are left with a tensor of dimensions `N, m`, where `m` is the number of (current) tags. These are the log-sum-exp accumulated scores over all possible sequences ending in each of the `m` tags. However, since valid sequences can only end with the `<end>` tag, **sum over only the `<end>` column to find the log-sum-exp of the scores of all possible valid sequences**.
+
+We find the difference, `log-sum-exp(all scores) - gold score`.
+
+### Viterbi Decoding
+
+See `ViterbiDecoder` in [`inference.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/inference.py).
+
+This implements the process described in the [Viterbi Decoding Overview](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#viterbi-decoding).
+
+We accumulate scores in a `for` loop in a manner similar to what we did in `ViterbiLoss`, except here we **find the maximum of the `previous_tag` scores for each `current_tag`**, instead of computing the log-sum-exp. We also **keep track of the `previous_tag` that corresponds to this maximum score** in a backpointer tensor.
+
+We **pad the backpointer tensor with `<end>` tags** because this allows us to trace backwards over the pads, eventually arriving at the _actual_ `<end>` tag, whereupon the _actual_ **backtracing** begins.
 
 # Training
 
 See `train.py`.
 
-### Viterbi Loss
+### Trimming Batch Inputs
 
-### Viterbi Decoding
+You will notice we **trim the inputs at each batch to the maximum sequence lengths in that batch**. This is so we don't have more pads in each batch that we actually need.
+
+But why? Although the RNNs in our model don't compute over the pads, **the linear layers still do**. It's pretty straightward to change this – see the related question about handling variable length sequences in the [FAQs](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs) section.
+
+For this tutorial, I figured a little extra computation over a few pads was worth the code-readability of not having to perform a slew of operations – Highway, CRF, other linear layers, concatenations – on a `packed_sequence`.
+
+### Loss
+
+In this co-training scenario, we have chosen to sum the Cross Entropy losses from the two language modelling tasks and the Viterbi Loss from the sequence labeling task.  
+
+Even though we are **minimizing the sum of these losses**, we are actually only interested in minimizing the Viterbi Loss _by virtue of minimizing the sum of these losses_. It is the Viterbi Loss which reflects performance on the primary task.
+
+We use `pack_padded_sequence()` to eliminate pads wherever necessary.
+
+### F1 Score
+
+Like in the paper, we use the **macro-averaged F1 score as the criterion for early-stopping**. Naturally, computing the F1 score requires Viterbi Decoding the CRF scores to generate our optimal tag sequences.
+
+We use `pack_padded_sequence()` to eliminate pads wherever necessary.
 
 ### Remarks
-
-# Inference
-
-### Some more examples
 
 # FAQs
 
 ---
 
-__How do we decide if we need `<start>` and `<end>` tokens for a model that handles sequences?__
+__How do we decide if we need `<start>` and `<end>` tokens for a model that uses sequences?__
 
 If this seems confusing at first, it will easily resolve itself when you think about the requirements of the model you are planning to train.
 

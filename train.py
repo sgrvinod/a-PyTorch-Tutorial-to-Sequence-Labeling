@@ -7,7 +7,7 @@ from models import LM_LSTM_CRF, ViterbiLoss
 from utils import *
 from torch.nn.utils.rnn import pack_padded_sequence
 from datasets import WCDataset
-from evaluate import ViterbiDecoder
+from inference import ViterbiDecoder
 from sklearn.metrics import f1_score
 
 # Data parameters
@@ -233,7 +233,6 @@ def train(train_loader, model, lm_criterion, crf_criterion, optimizer, epoch, vb
 
         # Back prop.
         optimizer.zero_grad()
-
         loss.backward()
 
         if grad_clip is not None:
