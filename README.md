@@ -512,7 +512,7 @@ At the very outset, we **sort the forward and backward character sequences by de
 
 Remember to also sort all other tensors in the same order.
 
-See [`dynamic_rnn.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/ddynamic_rnn.py) for an illustration of how `pack_padded_sequence()` can be used to take advantage of PyTorch's dynamic graphing and batching capabilities so that we don't process the pads. It flattens the sorted sequences by timestep while ignoring the pads, and the **LSTM computes over only the effective batch size `N_t` at each timestep**.
+See [`dynamic_rnn.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/dynamic_rnn.py) for an illustration of how `pack_padded_sequence()` can be used to take advantage of PyTorch's dynamic graphing and batching capabilities so that we don't process the pads. It flattens the sorted sequences by timestep while ignoring the pads, and the **LSTM computes over only the effective batch size `N_t` at each timestep**.
 
 ![](./img/sorted.jpg)
 
@@ -653,7 +653,7 @@ I refrain from fine-tuning because most of the input vocabulary is not in-corpus
 
 __What are some ways we can construct dynamic graphs in PyTorch to compute over only the true lengths of sequences?__
 
-If you're using an RNN, simply use [`pack_padded_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pack_padded_sequence). PyTorch will internally compute over only the true lengths. See [`dynamic_rnn.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/ddynamic_rnn.py) for an example.
+If you're using an RNN, simply use [`pack_padded_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pack_padded_sequence). PyTorch will internally compute over only the true lengths. See [`dynamic_rnn.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/dynamic_rnn.py) for an example.
 
 If you want to execute an operation (like a linear transformation) only on the true timesteps, `pack_padded_sequences()` is still the way to go. This flattens the tensor by timestep while removing the pads. You can perform your operation on this flattened tensor, and then use [`pad_packed_sequence()`](https://pytorch.org/docs/master/nn.html#torch.nn.utils.rnn.pad_packed_sequence) to unflatten it and re-pad it with `0`s.
 
