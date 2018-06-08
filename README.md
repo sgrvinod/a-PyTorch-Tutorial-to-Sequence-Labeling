@@ -665,12 +665,12 @@ If you want to perform timestep-wise operations, you can take a leaf out of how 
 
 __*Dunston Checks In*? Really?__
 
-I didn't have a single thought about this movie for twenty years. I was trying to think of a short sentence that would be easier to visualize in this tutorial and it just popped into my mind riding a wave of 90s nostalgia.
+I had no memory of this movie for twenty years. I was trying to think of a short sentence that would be easier to visualize in this tutorial and it just popped into my mind riding a wave of 90s nostalgia.
 
 <p align="center">
 <img src="./img/dci.jpg">
 </p>
 
-I wish I hadn't googled it though. Damn, the critics were harsh, weren't they? This gem was overwhelmingly and universally panned. I'm not sure I'd disagree if I watched it now, but that just goes to show the world is a lot more fun when you're a kid.
+I wish I hadn't googled it though. Damn, the critics were harsh, weren't they? This gem was overwhelmingly and universally panned. I'm not sure I'd disagree if I watched it now, but that just goes to show the world is so much more fun when you're a kid.
 
 Didn't have to worry about LM-LSTM-CRFs or nuthin...
