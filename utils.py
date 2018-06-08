@@ -295,8 +295,8 @@ def save_checkpoint(epoch, model, optimizer, val_f1, word_map, char_map, tag_map
     """
     state = {'epoch': epoch,
              'f1': val_f1,
-             'model_state': model.state_dict(),
-             'optimizer_state': optimizer.state_dict(),
+             'model': model,
+             'optimizer': optimizer,
              'word_map': word_map,
              'tag_map': tag_map,
              'char_map': char_map,

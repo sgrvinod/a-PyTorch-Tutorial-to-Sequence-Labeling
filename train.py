@@ -44,7 +44,7 @@ epochs = 200  # number of epochs to run without early-stopping
 grad_clip = 5.  # clip gradients at this value
 print_freq = 100  # print training or validation status every __ batches
 best_f1 = 0.  # F1 score to start with
-checkpoint = None  # path to model checkpoint
+checkpoint = 'checkpoint_lm_lstm_crf.pth.tar'  # path to model checkpoint
 
 tag_ind = 1 if task == 'pos' else 3  # choose column in CoNLL 2003 dataset
 
@@ -341,7 +341,7 @@ def validate(val_loader, model, crf_criterion, vb_decoder):
         if i % print_freq == 0:
             print('Validation: [{0}/{1}]\t'
                   'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Vtb Loss {vb_loss.val:.4f} ({vb_loss.avg:.4f})\t'
+                  'VB Loss {vb_loss.val:.4f} ({vb_loss.avg:.4f})\t'
                   'F1 Score {f1.val:.3f} ({f1.avg:.3f})\t'.format(i, len(val_loader), batch_time=batch_time,
                                                                   vb_loss=vb_losses, f1=f1s))
 

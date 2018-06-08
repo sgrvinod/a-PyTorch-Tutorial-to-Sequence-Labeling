@@ -36,19 +36,19 @@ This model is special because it augments the sequence labeling task by training
 
 # Concepts
 
-* **Sequence Labeling**
+* **Sequence Labeling**. Well, duh.
 
-* **Language Models**
+* **Language Models**. Language Modeling is to predict the next word or character in a sequence of words or characters. Neural language models achieve impressive results across a wide variety of NLP tasks like text generation, machine translation, image captioning, optical character recognition, and what have you.
 
-* **Co-Training**
+* **Character RNNs**. RNNs operating on individual characters in a text [are known](http://karpathy.github.io/2015/05/21/rnn-effectiveness/) to capture the underlying style and structure. In a sequence labeling task, they are especially useful since sub-word information can often yield important clues to an entity or tag.
 
-* **Subword Features with Character RNNs**
+* **Multi-Task Learning**. You will often find that the datasets available to train a model are disappointly small. Creating annotations or handcrafted features to help your model along is not only cumbersome, but also frequently not adaptable to the diverse domains or settings in which your model may be useful. Sequence labeling, unfortunately, is a prime example. There is a way to mitigate this problem - jointly training multiple models that are joined at he hip will maximize the information available to each model, improving performance.
 
-* **Conditional Random Fields**
+* **Conditional Random Fields**. Discrete classifiers predict a class or label at a word. Conditional Random Fields (CRFs) can do you one better – they predict labels based on not just the word, but also the neighborhood. Which makes sense, because there _are_ patterns in a sequence of entities or labels. CRFs are widely used to model ordered information, be it for sequence labeling, gene sequencing, or even object detection and image segmentation in computer vision.
 
-* **Viterbi Decoding**
+* **Viterbi Decoding**. Since we're using CRFs, we are not so much predicting the right label at each word but predicting the right label _sequence_ for a word sequence. Viterbi Decoding is a way to do exactly this – find the most optimal tag sequence from the scores computed by a Conditional Random Field.
 
-* **Highway Networks**
+* **Highway Networks**. Fully connected layers are a staple in any neural network to transform or extract features at different points. Highway Networks accomplish this, but also allow information to flow unimpeded across transformations. This makes deep networks much more efficient or feasible.
 
 # Overview
 
@@ -62,9 +62,9 @@ The authors refer to the model as the _Language Model - Long Short-Term Memory -
 
 This image from the paper thoroughly represents the entire model, but don't worry if it seems too complex at this time. We'll break it down to take a closer look at the components.
 
-### Co-training
+### Multi-Task Learning
 
-**Co-training is when you simultaneously train a model on two or more tasks.**
+**Multi-task learning is when you simultaneously train a model on two or more tasks.**
 
 Usually we're only interested in _one_ of these tasks – in this case, the sequence labeling.
 
@@ -72,7 +72,7 @@ But when layers in a neural network contribute towards performing multiple funct
 
 Enriching existing features in this manner removes the need for using handcrafted features for sequence labeling.
 
-The **total loss** during co-training is usually a linear combination of the losses on the individual tasks. The parameters of the combination can be fixed or learned as updateable weights.
+The **total loss** during multi-task learning is usually a linear combination of the losses on the individual tasks. The parameters of the combination can be fixed or learned as updateable weights.
 
 <p align="center">
 <img src="./img/loss.png">
@@ -166,15 +166,15 @@ A **Highway Network** is similar to a residual network, but we use a **sigmoid-a
 <img src="./img/highway.png">
 </p>
 
-The authors of the paper make the case that using highway networks instead of regular linear networks improves performance.
+Since the character-RNNs contribute towards multiple tasks, **Highway Networks are used for extracting task-specific information** from its outputs.
 
-We will use Highway Networks at **three locations** in our combined model –
+Therefore, we will use Highway Networks at **three locations** in our combined model –
 
 - to transform the output of the forward character-RNN to predict the next word.
 - to transform the output of the backward character-RNN to predict the next word (in the backward direction).
 - to transform the concatenated output of the forward and backward character-RNNs for use in the word-level RNN along with the word embedding.
 
-Since the character-RNNs contribute towards multiple tasks during co-training, the **Highway Networks are beneficial in extracting task-specific information** from its outputs.
+In a naive co-training setting, where we use the outputs of the character-RNNs directly for multiple tasks, i.e. without transformation, the discordance between the nature of the tasks could hurt performance.
 
 ### Putting it all together
 
@@ -190,19 +190,19 @@ Progressively removing parts of our network results in progressively simpler net
 
 #### (a) a Bi-LSTM + CRF sequence tagger that leverages sub-word information.
 
-There is no co-training.
+There is no multi-task learning.
 
 Using character-level information without co-training still improves performance.
 
 #### (b) a Bi-LSTM + CRF sequence tagger.
 
-There is no co-training or character-level processing.
+There is no multi-task learning or character-level processing.
 
 This configuration is used quite commonly in the industry and works well.
 
 #### (c) a Bi-LSTM sequence tagger.
 
-There is no co-training, character-level processing, or CRFing. Note that a linear or Highway layer would replace the latter.
+There is no multi-task learning, character-level processing, or CRFing. Note that a linear or Highway layer would replace the latter.
 
 This could work reasonably well, but a Conditional Random Field provides a sizeable performance boost.
 
@@ -522,7 +522,7 @@ Upon sorting, we **apply the forward and backward LSTMs on the forward and backw
 
 We **extract only the outputs at the forward and backward character markers** with [`gather`](https://pytorch.org/docs/master/torch.html#torch.gather). This function is very useful for extracting only certain indices from a tensor that are specified in a separate tensor.
 
-These **extracted outputs are processed by the forward and backward Highway layers** before applying a **linear layer to compute scores over the vocabulary** for predicting the next word at each marker. We do this only during training, since it makes no sense to perform language modeling for co-training during validation or inference. The `training` attribute of any model is set with `model.train()` or `model.eval()` in `train.py`. (Note that this is primarily used to enable or disable dropout and batch-norm layers in a PyTorch model during training and inference respectively.)
+These **extracted outputs are processed by the forward and backward Highway layers** before applying a **linear layer to compute scores over the vocabulary** for predicting the next word at each marker. We do this only during training, since it makes no sense to perform language modeling for multi-task learning during validation or inference. The `training` attribute of any model is set with `model.train()` or `model.eval()` in `train.py`. (Note that this is primarily used to enable or disable dropout and batch-norm layers in a PyTorch model during training and inference respectively.)
 
 ### Sequence Labeling Model
 
@@ -593,7 +593,7 @@ For this tutorial, I figured a little extra computation over a few pads was wort
 
 ### Loss
 
-In this co-training scenario, we have chosen to sum the Cross Entropy losses from the two language modelling tasks and the Viterbi Loss from the sequence labeling task.  
+In the multi-task scenario, we have chosen to sum the Cross Entropy losses from the two language modelling tasks and the Viterbi Loss from the sequence labeling task.  
 
 Even though we are **minimizing the sum of these losses**, we are actually only interested in minimizing the Viterbi Loss _by virtue of minimizing the sum of these losses_. It is the Viterbi Loss which reflects performance on the primary task.
 
@@ -606,6 +606,14 @@ Like in the paper, we use the **macro-averaged F1 score as the criterion for ear
 We use `pack_padded_sequence()` to eliminate pads wherever necessary.
 
 ### Remarks
+
+I have followed the parameters in the authors' implementation as closely as possible.
+
+I used a batch size of `10` sentences. I employed Stochastic Gradient Descent with momentum. The learning rate was decayed every epoch. I used 100D [GloVe](https://nlp.stanford.edu/projects/glove/) pretrained embeddings without fine-tuning.
+
+It took about 80s to train one epoch on a Titan X (Pascal).
+
+The F1 score on the validation set hit `91%` around epoch 50, and peaked at `91.6%` on epoch 171. I ran it for a total of 200 epochs. This is pretty close to the results in the paper.
 
 # FAQs
 
