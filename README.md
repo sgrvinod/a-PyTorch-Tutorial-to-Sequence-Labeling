@@ -42,13 +42,13 @@ This model is special because it augments the sequence labeling task by training
 
 * **Character RNNs**. RNNs operating on individual characters in a text [are known](http://karpathy.github.io/2015/05/21/rnn-effectiveness/) to capture the underlying style and structure. In a sequence labeling task, they are especially useful since sub-word information can often yield important clues to an entity or tag.
 
-* **Multi-Task Learning**. You will often find that the datasets available to train a model are disappointly small. Creating annotations or handcrafted features to help your model along is not only cumbersome, but also frequently not adaptable to the diverse domains or settings in which your model may be useful. Sequence labeling, unfortunately, is a prime example. There is a way to mitigate this problem - jointly training multiple models that are joined at he hip will maximize the information available to each model, improving performance.
+* **Multi-Task Learning**. You will often find that the datasets available to train a model are disappointly small. Creating annotations or handcrafted features to help your model along is not only cumbersome, but also frequently not adaptable to the diverse domains or settings in which your model may be useful. Sequence labeling, unfortunately, is a prime example. There is a way to mitigate this problem – jointly training multiple models that are joined at the hip will maximize the information available to each model, improving performance.
 
 * **Conditional Random Fields**. Discrete classifiers predict a class or label at a word. Conditional Random Fields (CRFs) can do you one better – they predict labels based on not just the word, but also the neighborhood. Which makes sense, because there _are_ patterns in a sequence of entities or labels. CRFs are widely used to model ordered information, be it for sequence labeling, gene sequencing, or even object detection and image segmentation in computer vision.
 
-* **Viterbi Decoding**. Since we're using CRFs, we are not so much predicting the right label at each word but predicting the right label _sequence_ for a word sequence. Viterbi Decoding is a way to do exactly this – find the most optimal tag sequence from the scores computed by a Conditional Random Field.
+* **Viterbi Decoding**. Since we're using CRFs, we're not so much predicting the right label at each word as we are predicting the right label _sequence_ for a word sequence. Viterbi Decoding is a way to do exactly this – find the most optimal tag sequence from the scores computed by a Conditional Random Field.
 
-* **Highway Networks**. Fully connected layers are a staple in any neural network to transform or extract features at different points. Highway Networks accomplish this, but also allow information to flow unimpeded across transformations. This makes deep networks much more efficient or feasible.
+* **Highway Networks**. Fully connected layers are a staple in any neural network to transform or extract features at different locations. Highway Networks accomplish this, but also allow information to flow unimpeded across transformations. This makes deep networks much more efficient or feasible.
 
 # Overview
 
@@ -589,7 +589,7 @@ You will notice we **trim the inputs at each batch to the maximum sequence lengt
 
 But why? Although the RNNs in our model don't compute over the pads, **the linear layers still do**. It's pretty straightward to change this – see the related question about handling variable length sequences in the [FAQs](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs) section.
 
-For this tutorial, I figured a little extra computation over a few pads was worth the code-readability of not having to perform a slew of operations – Highway, CRF, other linear layers, concatenations – on a `packed_sequence`.
+For this tutorial, I figured a little extra computation over some pads was worth the straight-forwardness of not having to perform a slew of operations – Highway, CRF, other linear layers, concatenations – on a `packed_sequence`.
 
 ### Loss
 

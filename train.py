@@ -44,7 +44,7 @@ epochs = 200  # number of epochs to run without early-stopping
 grad_clip = 5.  # clip gradients at this value
 print_freq = 100  # print training or validation status every __ batches
 best_f1 = 0.  # F1 score to start with
-checkpoint = 'checkpoint_lm_lstm_crf.pth.tar'  # path to model checkpoint
+checkpoint = None  # path to model checkpoint, None if none
 
 tag_ind = 1 if task == 'pos' else 3  # choose column in CoNLL 2003 dataset
 
