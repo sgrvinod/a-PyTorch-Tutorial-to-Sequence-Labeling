@@ -589,7 +589,7 @@ You will notice we **trim the inputs at each batch to the maximum sequence lengt
 
 But why? Although the RNNs in our model don't compute over the pads, **the linear layers still do**. It's pretty straightward to change this – see the related question about handling variable length sequences in the [FAQs](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling#faqs) section.
 
-For this tutorial, I figured a little extra computation over some pads was worth the straight-forwardness of not having to perform a slew of operations – Highway, CRF, other linear layers, concatenations – on a `packed_sequence`.
+For this tutorial, I figured a little extra computation over some pads was worth the straightforwardness of not having to perform a slew of operations – Highway, CRF, other linear layers, concatenations – on a `packed_sequence`.
 
 ### Loss
 
