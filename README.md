@@ -470,7 +470,7 @@ These are the actual lengths of the character sequences including the `<end>` to
 
 Therefore, **character lengths fed to the model must be an `Int` tensor of dimensions `N`**.
 
-### Data pipeline
+### Data Pipeline
 
 See `read_words_tags()` in [`utils.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/utils.py).
 
@@ -532,7 +532,7 @@ We also **sort the word sequences by decreasing lengths**, because there may not
 
 Remember to also sort all other tensors in the same order.
 
-We **concatenate the foward and backward character LSTM outputs at the markers, and run it through the third Highway layer**. This will extract the sub-word information at each word which we will use for sequence labeling.
+We **concatenate the forward and backward character LSTM outputs at the markers, and run it through the third Highway layer**. This will extract the sub-word information at each word which we will use for sequence labeling.
 
 We **concatenate this result with the word embeddings, and compute BLSTM outputs** over the `packed_sequence`.
 
@@ -614,6 +614,10 @@ I used a batch size of `10` sentences. I employed Stochastic Gradient Descent wi
 It took about 80s to train one epoch on a Titan X (Pascal).
 
 The F1 score on the validation set hit `91%` around epoch 50, and peaked at `91.6%` on epoch 171. I ran it for a total of 200 epochs. This is pretty close to the results in the paper.
+
+### Model Checkpoint
+
+You can download this pretrained model [here](https://drive.google.com/open?id=1P-w-s6QbsixcGnm3UjPMkgGpuz684kiY).
 
 # FAQs
 
