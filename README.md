@@ -583,6 +583,16 @@ We **pad the backpointer tensor with `<end>` tags** because this allows us to tr
 
 See `train.py`.
 
+The parameters for the model (and training it) are at the beginning of the file, so you can easily check or modify them should you wish to.
+
+To **train your model from scratch**, simply run this file –
+
+`python train.py`
+
+To **resume training at a checkpoint**, point to the corresponding file with the `checkpoint` parameter at the beginning of the code.
+
+Note that we perform validation at the end of every training epoch.
+
 ### Trimming Batch Inputs
 
 You will notice we **trim the inputs at each batch to the maximum sequence lengths in that batch**. This is so we don't have more pads in each batch that we actually need.
