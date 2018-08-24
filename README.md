@@ -581,7 +581,7 @@ We **pad the backpointer tensor with `<end>` tags** because this allows us to tr
 
 # Training
 
-See [`train.py`]((https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/train.py).
+See [`train.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Sequence-Labeling/blob/master/train.py).
 
 The parameters for the model (and training it) are at the beginning of the file, so you can easily check or modify them should you wish to.
 
