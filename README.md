@@ -36,7 +36,7 @@ This model is special because it augments the sequence labeling task by training
 
 # Concepts
 
-* **Sequence Labeling**. Well, duh.
+* **Sequence Labeling**. duh.
 
 * **Language Models**. Language Modeling is to predict the next word or character in a sequence of words or characters. Neural language models achieve impressive results across a wide variety of NLP tasks like text generation, machine translation, image captioning, optical character recognition, and what have you.
 
