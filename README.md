@@ -277,7 +277,7 @@ Repeat this process at the third word.
 
 ...and the last word, which is the `<end>` token.
 
-Here, the only difference is you _ already know_ the correct tag. You need the maximum score and backpointer **only for the `<end>` tag**.
+Here, the only difference is you _already know_ the correct tag. You need the maximum score and backpointer **only for the `<end>` tag**.
 
 ![](./img/end1.jpg)
 ![](./img/end2.jpg)
@@ -647,7 +647,7 @@ __Can we have the CRF generate `current_word -> next_word` scores instead of `pr
 
 Yes. In this case you would broadcast the emission scores like `L, m, _`, and you would have a `<start>` token in every sentence instead of an `<end>` token. The correct tag of the `<start>` token would always be the `<start>` tag. The "next tag" of the last word would always be the `<end>` tag.
 
-I think the `previous word -> next word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learn to recognize when a sentence is complete.
+I think the `previous word -> current word` convention is slightly better because there are language models in the mix. It fits in quite nicely to be able to predict the `<end>` token at the last real word, and therefore learn to recognize when a sentence is complete.
 
 ---
 
